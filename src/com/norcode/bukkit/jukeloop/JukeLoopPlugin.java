@@ -21,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class JukeLoopPlugin extends JavaPlugin implements Listener {
 	
+	public static HashMap<Material, String> recordNames = new HashMap<Material, String>(13);
 	
 	public static BlockFace[] directions = new BlockFace[] { 
 		BlockFace.EAST, 
@@ -31,6 +32,21 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
 	public static ArrayList<Material> playlistOrder;
 	public static HashMap<Material, Integer> recordDurations = new HashMap<Material, Integer>();
 	static {
+		// set record names
+		recordNames.put(Material.GOLD_RECORD, "13"); 
+		recordNames.put(Material.GREEN_RECORD,"cat");
+		recordNames.put(Material.RECORD_3, "blocks"); 
+		recordNames.put(Material.RECORD_4, "chirp");  
+        recordNames.put(Material.RECORD_5, "far"); 
+        recordNames.put(Material.RECORD_6, "mall"); 
+        recordNames.put(Material.RECORD_7, "mellohi"); 
+        recordNames.put(Material.RECORD_8, "stal"); 
+        recordNames.put(Material.RECORD_9, "strad");  
+        recordNames.put(Material.RECORD_10, "ward"); 
+        recordNames.put(Material.RECORD_11, "11"); 
+		recordNames.put(Material.RECORD_12, "wait");
+		
+		// set record durations
 		recordDurations.put(Material.GOLD_RECORD,(2 * 60) + 58); 
 		recordDurations.put(Material.GREEN_RECORD,(3 * 60) + 5);
 		recordDurations.put(Material.RECORD_3,(5 * 60) + 45); 
@@ -57,8 +73,16 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
 		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
+				ArrayList<Location> toRemove = new ArrayList<Location>();
 				for (LoopingJukebox jb: LoopingJukebox.jukeboxMap.values()) {
-					jb.doLoop();
+					if (jb.isDead) {
+						toRemove.add(jb.getLocation());
+					} else {
+						jb.doLoop();
+					}
+				}
+				for (Location l: toRemove) {
+					LoopingJukebox.jukeboxMap.remove(l);
 				}
 			}
 		}, 40, 40);
@@ -99,10 +123,13 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
 	public void onInteractJukebox(PlayerInteractEvent e) {
 		if (!e.getPlayer().hasPermission("jukeloop.use")) return;
 		if (e.getAction() == Action.LEFT_CLICK_BLOCK && e.getClickedBlock().getType() == Material.JUKEBOX) {
-			LoopingJukebox jb = LoopingJukebox.getAt(this, e.getClickedBlock().getLocation());
-			if (jb != null) {
-				jb.onEject();
-				jb.doLoop();
+			if (((Jukebox)e.getClickedBlock().getState()).isPlaying()) {
+				LoopingJukebox jb = LoopingJukebox.getAt(this, e.getClickedBlock().getLocation());
+				if (jb != null && jb.getJukebox().isPlaying()) {
+					jb.onEject();
+					jb.doLoop();
+					e.setCancelled(true);
+				}				
 			}
 		} else if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock().getType() == Material.JUKEBOX && 
 				 recordDurations.containsKey(e.getPlayer().getItemInHand().getType())) {
@@ -111,13 +138,11 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
 			LoopingJukebox jb = LoopingJukebox.getAt(this, box.getLocation());
 			Material record = e.getPlayer().getItemInHand().getType();
 			if (!box.isPlaying()) {
-				getLogger().info("Wasn't Playing");
 				e.setCancelled(true);
 				box.setPlaying(record);
 				e.getPlayer().setItemInHand(new ItemStack(Material.AIR));
 				jb.onInsert(record);
 			} else {
-				getLogger().info("Was Playing");
 				jb.onEject();
 			}
 		}

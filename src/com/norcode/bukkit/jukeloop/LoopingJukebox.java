@@ -19,6 +19,7 @@ public class LoopingJukebox {
 	private Chest chest;
 	private JukeLoopPlugin plugin;
 	private int startedAt = -1;
+	public boolean isDead = false;
 	
 	public static LinkedHashMap<Location, LoopingJukebox> jukeboxMap = new LinkedHashMap<Location, LoopingJukebox>();
 	public static LoopingJukebox getAt(JukeLoopPlugin plugin, Location loc) {
@@ -35,11 +36,17 @@ public class LoopingJukebox {
 		return null;
 	}
 	
+	public Location getLocation() {
+		return location;
+	}
 	public LoopingJukebox(JukeLoopPlugin plugin, Location location) {
 		this.location = location;
 		this.plugin = plugin;
 	}
 	
+	public void log(String msg) {
+		plugin.getLogger().info("[Jukebox@" + location.getWorld().getName() + " " + location.getBlockX() + " " + location.getBlockY() + " " + location.getBlockZ() + "] " + msg);
+	}
 	public Jukebox getJukebox() {
 		try {
 			return (Jukebox)this.location.getBlock().getState();
@@ -75,17 +82,14 @@ public class LoopingJukebox {
 				continue;
 			}
 		}
-		if (this.chest != null) {
-			plugin.getLogger().info("Has a chest!");
-		}
 		return true;
 	}
 	
 	public void doLoop() {
 		Jukebox jukebox = getJukebox();
 		if (jukebox == null) {
-			plugin.getLogger().info("Jukebox Destroyed, removing from cache");
-			this.jukeboxMap.remove(location);
+			log("Destroyed, removing from cache");
+			this.isDead = true;
 			return;
 		}
 		if (!getJukebox().isPlaying()) return;
@@ -108,8 +112,8 @@ public class LoopingJukebox {
 	
 	
 	private void loopOneDisc(int now) {
-			plugin.getLogger().info("Looping single disc");
 			Material record = this.getJukebox().getPlaying();
+			log("Looping single disc: " + plugin.recordNames.get(record));
 			this.getJukebox().setPlaying(record);
 			onInsert(record);
 					
@@ -124,29 +128,34 @@ public class LoopingJukebox {
 	}
 	
 	private void loopFromChest(int now) {
-		plugin.getLogger().info("Looping from chest");
+		
 		Jukebox jukebox = getJukebox();
 		Material record = jukebox.getPlaying();
+		
 		Chest chest = getChest();
-		chest.getBlockInventory().addItem(new ItemStack(record));
+		int idx = chest.getBlockInventory().firstEmpty();
+		if (idx == -1) { 
+			loopOneDisc(now); 
+			return; 
+		}
+		chest.getBlockInventory().setItem(idx, new ItemStack(record));
 		Material newRecord = null;
-		boolean next = false;
+		ItemStack[] contents = chest.getBlockInventory().getContents();
+		int i=idx +1;
+		if (i >= chest.getBlockInventory().getSize()) i = 0;
 		while (newRecord == null) {
-			for (Material m: plugin.recordDurations.keySet()) {
-				if (next) {
-					if (chest.getBlockInventory().contains(m)) {
-						chest.getBlockInventory().removeItem(new ItemStack(m,1));
-						newRecord = m;
-						next = false;
-						break;
-					}
-				}
-				if (m.equals(record)) {
-					next = true;
+			if (contents[i] != null) {
+				if (plugin.recordDurations.containsKey(contents[i].getType())) {
+					newRecord = contents[i].getType();
+					chest.getBlockInventory().setItem(i, new ItemStack(Material.AIR));
+					break;
 				}
 			}
+			i++;
+			if (i == contents.length) i = 0;
+			if (i == idx) break;
 		}
-		
+		log("Looping from chest: " + plugin.recordNames.get(record) + " -> " + plugin.recordNames.get(newRecord));
 		this.startedAt = now;
 		jukebox.setPlaying(newRecord);
 		
