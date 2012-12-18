@@ -4,6 +4,7 @@ package com.norcode.bukkit.jukeloop;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 
 import org.bukkit.Effect;
@@ -74,9 +75,11 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
 			@Override
 			public void run() {
 				ArrayList<Location> toRemove = new ArrayList<Location>();
-				for (LoopingJukebox jb: LoopingJukebox.jukeboxMap.values()) {
-					if (jb.isDead) {
-						toRemove.add(jb.getLocation());
+				LoopingJukebox jb;
+				for (Entry<Location, LoopingJukebox> e: LoopingJukebox.jukeboxMap.entrySet()) {
+					jb = e.getValue();
+					if (jb == null || jb.isDead) {
+						toRemove.add(e.getKey());
 					} else {
 						jb.doLoop();
 					}

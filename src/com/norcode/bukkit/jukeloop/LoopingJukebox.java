@@ -11,6 +11,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Jukebox;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class LoopingJukebox {
@@ -85,6 +86,23 @@ public class LoopingJukebox {
 		return true;
 	}
 	
+	public boolean playersNearby() {
+		double dist;
+		for (Player p: plugin.getServer().getOnlinePlayers()) {
+			try {
+				dist = getJukebox().getLocation().distance(p.getLocation());
+				if (dist <= 64) {
+					return true; 
+				}
+			} catch (IllegalArgumentException ex) {
+				// Cannot measure distance between 2 different worlds.
+				//log(ex.getMessage()); 
+			}
+		} 
+		
+		return false;
+	}
+	
 	public void doLoop() {
 		Jukebox jukebox = getJukebox();
 		if (jukebox == null) {
@@ -93,13 +111,13 @@ public class LoopingJukebox {
 			return;
 		}
 		if (!getJukebox().isPlaying()) return;
-		if (!location.getChunk().isLoaded()) return;
+		
 		
 		
 		int now = (int)(System.currentTimeMillis()/1000);
 		Material record = this.jukebox.getPlaying();
 		if (now - startedAt > plugin.recordDurations.get(record)) {
-
+			if (!playersNearby()) return;
 			if (this.getChest() == null) {
 				loopOneDisc(now);
 			} else {
