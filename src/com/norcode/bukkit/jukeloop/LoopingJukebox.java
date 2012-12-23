@@ -175,7 +175,9 @@ public class LoopingJukebox {
 		}
 		log("Looping from chest: " + plugin.recordNames.get(record) + " -> " + plugin.recordNames.get(newRecord));
 		this.startedAt = now;
-		jukebox.setPlaying(newRecord);
+		if (newRecord != null) {
+			jukebox.setPlaying(newRecord);
+		}
 		
 	}
 	
