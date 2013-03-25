@@ -3,12 +3,14 @@ JukeLoop makes Jukeboxes a lot cooler. Jukeboxes will loop, replaying the disc w
 == Features ==
 
 * Records will start playing automatically even after a server restart. (locations of jukeboxes stored in config)
-* Rotate through records in a chest placed adjacent to the jukebox.
 * Punch the jukebox to skip the song.
+* Rotate through records in a chest placed adjacent to the jukebox
+* jukeboxes will place played discs in a hopper if there is one directly below
+* jukeboxes will take discs from an attached hopper
+
 
 
 == Commands ==
-
 
  * None
 
