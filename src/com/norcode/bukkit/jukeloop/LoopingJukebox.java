@@ -219,7 +219,6 @@ public class LoopingJukebox {
         for (BlockFace dir: JukeLoopPlugin.directions) {
             if (!dir.equals(BlockFace.DOWN)) {
                 BlockState bs = this.getJukebox().getBlock().getRelative(dir).getState();
-                plugin.getLogger().info("Checking " + dir);
                 if (bs.getType().equals(Material.HOPPER)) {
                     byte data = ((Hopper) bs).getData().getData();
                     boolean isPowered = (data & 8) == 8;
