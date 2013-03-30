@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -20,7 +22,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
 public class JukeLoopPlugin extends JavaPlugin implements Listener {
-
+    
+    private static Pattern locRegex = Pattern.compile("(\\w+)_(\\-?\\d+)_(\\-?\\d+)_(\\-?\\d+)");
     public static HashMap<Material, String> recordNames = new HashMap<Material, String>(
             13);
 
@@ -100,17 +103,25 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
             }, 20*60*5, 20*60*5);
     }
 
+    
+    private Location parseLocation(String s) {
+        Matcher m = locRegex.matcher(s);
+        if (m.matches()) {
+            try {
+                return new Location(getServer().getWorld(m.group(1)), Double.parseDouble(m.group(2)), Double.parseDouble(m.group(3)), Double.parseDouble(m.group(3)));
+            } catch (IllegalArgumentException ex) {
+                getLogger().warning("Invalid entry: " + s);
+            }
+        }
+        return null;
+    }
+    
     private void loadData() {
         World w = null;
         Location l = null;
-
         for (String s : getConfig().getStringList("jukeboxes")) {
             getLogger().info("initializing jukebox@" + s);
-            String[] locParts = s.split("_");
-            w = getServer().getWorld(locParts[0]);
-            l = new Location(w, Double.parseDouble(locParts[1]),
-                    Double.parseDouble(locParts[2]),
-                    Double.parseDouble(locParts[3]));
+            l = parseLocation(s);
             LoopingJukebox.jukeboxMap.put(l, LoopingJukebox.getAt(this, l));
         }
     }

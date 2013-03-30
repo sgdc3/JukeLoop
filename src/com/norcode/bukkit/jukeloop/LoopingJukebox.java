@@ -78,9 +78,11 @@ public class LoopingJukebox {
     }
 
     public boolean validate() {
+        log("Validating...");
         try {
             this.jukebox = (Jukebox)this.location.getBlock().getState();
         } catch (ClassCastException ex) {
+            log(ex.getMessage());
             return false;
         }
         this.chest = null;
@@ -88,13 +90,15 @@ public class LoopingJukebox {
         for (BlockFace f: JukeLoopPlugin.directions) {
             try {
                 rel = (BlockState)this.jukebox.getBlock().getRelative(f).getState();
-                this.chest = (Chest)rel;
+                this.chest = (Chest) rel;
                 if (!containsRecords(this.chest.getInventory())) {
+                    log(this.chest + " does not contain records. skipping.");
                     continue;
                 }
                 this.chest = (Chest) rel;
                 break;
             } catch (ClassCastException ex) {
+                log(ex.getMessage());
                 continue;
             }
         }
@@ -103,7 +107,7 @@ public class LoopingJukebox {
 
     public boolean containsRecords(Inventory inv) {
         for (ItemStack s : inv.getContents()) {
-            if (s != null && plugin.recordDurations.keySet().contains(s.getType())) {
+            if (s != null && JukeLoopPlugin.recordDurations.keySet().contains(s.getType())) {
                 return true;
             }
         }
@@ -118,7 +122,7 @@ public class LoopingJukebox {
                 if (dist <= 64) {
                     return true;
                 }
-            } catch (IllegalArgumentException ex) {
+            } catch (IllegalArgumentException ex) { // cross-world.
             }
         }
 
@@ -126,22 +130,29 @@ public class LoopingJukebox {
     }
 
     public void doLoop() {
+        
         Jukebox jukebox = getJukebox();
         if (jukebox == null) {
             this.isDead = true;
+            log("doLoop:Died.");
             return;
         }
 
         if (!getJukebox().isPlaying()) {
+            log("doLoop:not playing.");
             return;
         }
 
         int now = (int) (System.currentTimeMillis() / 1000);
         Material record = jukebox.getPlaying();
-        if (now - startedAt > plugin.recordDurations.get(record)) {
-            if (!playersNearby()) { return; }
+        if (now - startedAt > JukeLoopPlugin.recordDurations.get(record)) {
+            if (!playersNearby()) { 
+                log("doLoop:No player nearby.");
+                return; 
+            }
             if (!putInHopper()) {
                 if (!putInChest()) {
+                    log("doLoop:Couldn't put " + record + " anywhere, repeating.");
                     jukebox.setPlaying(record);
                     onInsert(record);
                     return;
@@ -179,14 +190,19 @@ public class LoopingJukebox {
         Chest chest = getChest();
         if (chest != null) {
             Inventory inv = chest.getInventory();
-            if (chestSlot == -1 || (inv.getItem(chestSlot) != null && !inv.getItem(chestSlot).getType().equals(Material.AIR))) {
+            if (chestSlot == -1 || chestSlot > chest.getInventory().getSize()-1 ||(inv.getItem(chestSlot) != null && !inv.getItem(chestSlot).getType().equals(Material.AIR))) {
                 chestSlot = inv.firstEmpty();
             }
             if (chestSlot >= 0) {
+                log("Placing " + jukebox.getPlaying() + " in slot " + chestSlot + " of chest@"+chest.getLocation().getBlockX() + ","+chest.getLocation().getBlockY() +","+ chest.getLocation().getBlockZ());
                 inv.setItem(chestSlot, new ItemStack(jukebox.getPlaying()));
                 jukebox.setPlaying(null);
                 return true;
+            } else {
+                log("Failed to place " + jukebox.getPlaying() + " in chest@"+chest.getLocation().getBlockX() + ","+chest.getLocation().getBlockY() +","+ chest.getLocation().getBlockZ() + " there is no free slot.");
             }
+        } else {
+            log("putInChest:there is no chest.");
         }
         return false;
     }
@@ -202,6 +218,7 @@ public class LoopingJukebox {
                 }
                 ItemStack s = inv.getItem(i);
                 if (s != null && JukeLoopPlugin.recordDurations.containsKey(s.getType())) {
+                    log("Taking " + s.getType() + " from slot " + i + " of chest@"+chest.getLocation().getBlockX() + ","+chest.getLocation().getBlockY() +","+ chest.getLocation().getBlockZ());
                     jukebox.setPlaying(s.getType());
                     onInsert(jukebox.getPlaying());
                     inv.setItem(i, null);
@@ -209,9 +226,11 @@ public class LoopingJukebox {
                     return true;
                 }
                 ++i;
-                
             }
+        } else {
+            log("putInChest:there is no chest.");
         }
+        log("Failed to take a disc from the chest, there wasn't one.");
         return false;
     }
 
