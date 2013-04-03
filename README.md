@@ -23,17 +23,10 @@ Permissions
 * 'jukeloop.use' - players with this permission will automatically have their jukeboxes repeat.
 
 
-Tutorial
-===
-
-Thanks to M3DDLER Over at [MedMania](http://www.medmania.co.uk/) for the great tutorial vid.
-
-http://www.youtube.com/watch?v=r58gAW4ga2U
-
-Source
+Source Code & Development Builds
 ===
 
 
 Source code is available on [Github](http://github.com/andrepl/JukeLoop/)
 
-[![Build Status](https://travis-ci.org/andrepl/PotatoBombs.png)](https://travis-ci.org/andrepl/PotatoBombs)
+[![Build Status](https://travis-ci.org/andrepl/JukeLoop.png)](https://travis-ci.org/andrepl/JukeLoop)
