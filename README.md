@@ -35,3 +35,5 @@ Source
 
 
 Source code is available on [Github](http://github.com/andrepl/JukeLoop/)
+
+[![Build Status](https://travis-ci.org/andrepl/PotatoBombs.png)](https://travis-ci.org/andrepl/PotatoBombs)
