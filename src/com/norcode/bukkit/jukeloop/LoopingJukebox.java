@@ -3,10 +3,8 @@ package com.norcode.bukkit.jukeloop;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
@@ -51,10 +49,12 @@ public class LoopingJukebox {
     }
 
     public void log(String msg) {
-        plugin.getLogger().info(
-                "[Jukebox@" + location.getWorld().getName() + " "
-                        + location.getBlockX() + " " + location.getBlockY()
-                        + " " + location.getBlockZ() + "] " + msg);
+        if (plugin.debugMode) {
+            plugin.getLogger().info(
+                    "[Jukebox@" + location.getWorld().getName() + " "
+                            + location.getBlockX() + " " + location.getBlockY()
+                            + " " + location.getBlockZ() + "] " + msg);
+        }
     }
 
     public Jukebox getJukebox() {
@@ -78,11 +78,14 @@ public class LoopingJukebox {
     }
 
     public boolean validate() {
-        log("Validating...");
         try {
-            this.jukebox = (Jukebox)this.location.getBlock().getState();
+            this.jukebox = (Jukebox) this.location.getBlock().getState();
         } catch (ClassCastException ex) {
-            log(ex.getMessage());
+            ex.printStackTrace();
+            return false;
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+            plugin.getLogger().warning("Caught NPE in validate: location: " + (this.location == null ? "null" : this.location) + ", block: " + (this.location.getBlock() == null ? "null" : this.location.getBlock()));
             return false;
         }
         this.chest = null;
@@ -160,7 +163,7 @@ public class LoopingJukebox {
             }
             if (!takeFromHopper()) {
                 if (!takeFromChest()) {
-                    plugin.getLogger().info("This shouldn't happen");
+                    log("This shouldn't happen");
                 }
             }
         }

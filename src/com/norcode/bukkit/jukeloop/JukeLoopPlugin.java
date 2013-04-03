@@ -34,6 +34,7 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
     public static ArrayList<Material> playlistOrder;
     public static HashMap<Material, Integer> recordDurations = new HashMap<Material, Integer>();
     private BukkitTask checkTask = null;
+    public boolean debugMode = false;
     private BukkitTask saveTask = null;
     static {
         // set record names
@@ -68,11 +69,18 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
             playlistOrder.add(m);
         }
     };
-
+    private void debug(String string) {
+        // TODO Auto-generated method stub
+        if (getConfig().getBoolean("debug", false)) {
+            getLogger().info(string);
+        }
+    } 
+    
     @Override
     public void onEnable() {
         // TODO Auto-generated method stub
         loadData();
+        debugMode = getConfig().getBoolean("debug", false);
         getServer().getPluginManager().registerEvents(this, this);
         checkTask = getServer().getScheduler().runTaskTimer(this,
             new Runnable() {
@@ -80,20 +88,23 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
                 public void run() {
                     ArrayList<Location> toRemove = new ArrayList<Location>();
                     LoopingJukebox jb;
-                    for (Entry<Location, LoopingJukebox> e : LoopingJukebox.jukeboxMap
-                            .entrySet()) {
+                    for (Entry<Location, LoopingJukebox> e : LoopingJukebox.jukeboxMap.entrySet()) {
+                        debug("Checking " + e.getKey() + "->" + e.getValue());
                         jb = e.getValue();
                         if (jb == null || jb.isDead) {
                             toRemove.add(e.getKey());
+                            debug("Removing: " + e.getKey() + " from active jukeboxen");
                         } else {
                             jb.doLoop();
+                            debug("looping " + jb);
                         }
                     }
                     for (Location l : toRemove) {
                         LoopingJukebox.jukeboxMap.remove(l);
                     }
-            }
+                }
         }, 40, 40);
+
         saveTask = getServer().getScheduler().runTaskTimer(this, 
             new Runnable() {
                 @Override
@@ -103,27 +114,28 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
             }, 20*60*5, 20*60*5);
     }
 
-    
     private Location parseLocation(String s) {
         Matcher m = locRegex.matcher(s);
         if (m.matches()) {
             try {
-                return new Location(getServer().getWorld(m.group(1)), Double.parseDouble(m.group(2)), Double.parseDouble(m.group(3)), Double.parseDouble(m.group(3)));
+                return new Location(getServer().getWorld(m.group(1)), Double.parseDouble(m.group(2)), Double.parseDouble(m.group(3)), Double.parseDouble(m.group(4)));
             } catch (IllegalArgumentException ex) {
                 getLogger().warning("Invalid entry: " + s);
             }
         }
         return null;
     }
-    
+
     private void loadData() {
         World w = null;
         Location l = null;
         for (String s : getConfig().getStringList("jukeboxes")) {
-            getLogger().info("initializing jukebox@" + s);
             l = parseLocation(s);
-            LoopingJukebox.jukeboxMap.put(l, LoopingJukebox.getAt(this, l));
+            LoopingJukebox box = LoopingJukebox.getAt(this, l);
+            LoopingJukebox.jukeboxMap.put(l, box);
+            debug("initialized " + l + "->" + box);
         }
+        debug("map has " + LoopingJukebox.jukeboxMap.size() + " entries.");
     }
 
     private void saveData() {
@@ -162,9 +174,7 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
             }
         } else if (e.getAction() == Action.RIGHT_CLICK_BLOCK
                 && e.getClickedBlock().getType() == Material.JUKEBOX
-                && recordDurations.containsKey(e.getPlayer().getItemInHand()
-                        .getType())) {
-
+                && recordDurations.containsKey(e.getPlayer().getItemInHand().getType())) {
             Jukebox box = (Jukebox) e.getClickedBlock().getState();
             LoopingJukebox jb = LoopingJukebox.getAt(this, box.getLocation());
             Material record = e.getPlayer().getItemInHand().getType();
