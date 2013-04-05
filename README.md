@@ -29,4 +29,4 @@ Source Code & Development Builds
 
 Source code is available on [Github](http://github.com/andrepl/JukeLoop/)
 
-[![Build Status](https://travis-ci.org/andrepl/JukeLoop.png)](https://travis-ci.org/andrepl/JukeLoop)
+[Jukeloop Development Builds](http://mcgitlab.norcode.com:8081/job/JukeLoop/lastSuccessfulBuild/JukeLoop$JukeLoop/)
