@@ -1,10 +1,10 @@
-JukeLoop makes Jukeboxes a lot cooler. Jukeboxes will loop, replaying the disc when the song ends.  If a chest is directly adjacent to a jukebox, it will loop through the discs in the chest.  And now, jukeboxes will even attempt to place discs into a hopper directly below them, and take discs from another hopper attached to the top, or any of the 4 sides.
+JukeLoop makes Jukeboxes a lot cooler.  Jukeboxes automatically start, repeat, and loop through and records in adjacent chests or hoppers.  Finished discs can be deposited into hoppers directly below jukeboxes.  The current song can be skipped by either punching the jukebox or delivering a redstone pulse.
 
 Features
 ===
 
 * Records will start playing automatically even after a server restart. (locations of jukeboxes stored in config)
-* Punch the jukebox to skip the song.
+* Punch the jukebox to skip the song, or send a restone pulse into the jukebox! (new in 0.1.4)
 * Rotate through records in a chest placed adjacent to the jukebox
 * jukeboxes will place played discs in a hopper if there is one directly below
 * jukeboxes will take discs from an attached hopper
@@ -26,9 +26,7 @@ Permissions
 Tutorial
 ===
 
-Thanks to M3DDLER Over at [MedMania](http://www.medmania.co.uk/) for the great tutorial vid.
-
-http://www.youtube.com/watch?v=r58gAW4ga2U
+http://www.youtube.com/watch?v=XabjZxyOyOM
 
 Source
 ===
