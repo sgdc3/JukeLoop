@@ -81,11 +81,8 @@ public class LoopingJukebox {
         try {
             this.jukebox = (Jukebox) this.location.getBlock().getState();
         } catch (ClassCastException ex) {
-            ex.printStackTrace();
             return false;
         } catch (NullPointerException ex) {
-            ex.printStackTrace();
-            plugin.getLogger().warning("Caught NPE in validate: location: " + (this.location == null ? "null" : this.location) + ", block: " + (this.location.getBlock() == null ? "null" : this.location.getBlock()));
             return false;
         }
         this.chest = null;
