@@ -2,22 +2,38 @@ package com.norcode.bukkit.jukeloop;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Jukebox;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Attachable;
+import org.bukkit.material.Button;
+import org.bukkit.material.Diode;
+import org.bukkit.material.Lever;
+import org.bukkit.material.PressurePlate;
+import org.bukkit.material.Redstone;
+import org.bukkit.material.RedstoneTorch;
+import org.bukkit.material.RedstoneWire;
+import org.bukkit.material.SimpleAttachableMaterialData;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -155,6 +171,107 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
         checkTask.cancel();
         saveData();
         super.onDisable();
+    }
+
+    private static BlockFace[] allSides = new BlockFace[] {
+        BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH,
+        BlockFace.DOWN, BlockFace.UP
+    };
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onBlockRedstoneEvent(BlockRedstoneEvent event) {
+        Block jukebox = null;
+        switch (event.getBlock().getType()) {
+        case REDSTONE_TORCH_OFF:
+            RedstoneTorch torch = (RedstoneTorch) Material.REDSTONE_TORCH_OFF.getNewData(event.getBlock().getData());
+            for (BlockFace bf: allSides) {
+                if (bf.equals(torch.getAttachedFace())) continue;
+                if (event.getBlock().getRelative(bf).getType().equals(Material.JUKEBOX)) {
+                    loopIfJukebox(event.getBlock().getRelative(bf));
+                }
+            }
+            break;
+        case REDSTONE_BLOCK:
+        case REDSTONE_WIRE:
+            if (event.getOldCurrent() == 0 && event.getNewCurrent() >= 1) {
+                for (BlockFace bf: allSides) {
+                    if (event.getBlock().getRelative(bf).getType().equals(Material.JUKEBOX)) {
+                        loopIfJukebox(event.getBlock().getRelative(bf));
+                    }
+                }
+            }
+            break;
+        case DIODE_BLOCK_OFF:
+            Diode diode = (Diode) Material.DIODE_BLOCK_OFF.getNewData(event.getBlock().getData());
+            Block b = event.getBlock().getRelative(diode.getFacing());
+            if (b.getType().equals(Material.JUKEBOX)) {
+                loopIfJukebox(b);
+            }
+            break;
+        case LEVER:
+        case STONE_BUTTON:
+        case WOOD_BUTTON:
+            Attachable lever = (Attachable) Material.LEVER.getNewData(event.getBlock().getData());
+            Redstone redstone = (Redstone) Material.LEVER.getNewData(event.getBlock().getData());
+            Set<Block> checked = new HashSet<Block>();
+            if (redstone.isPowered()) {
+                for (BlockFace bf: allSides) {
+                    b = event.getBlock().getRelative(bf);
+                    if (b.getType().equals(Material.JUKEBOX)) {
+                        loopIfJukebox(b);
+                    }
+                }
+                Block other = event.getBlock().getRelative(lever.getAttachedFace());
+                for (BlockFace bf: allSides) {
+                    b = other.getRelative(bf);
+                    if (b.getType().equals(Material.JUKEBOX)) {
+                        loopIfJukebox(b);
+                    }
+                }
+            }
+            break;
+        case STONE_PLATE:
+        case WOOD_PLATE:
+        case IRON_PLATE:
+        case GOLD_PLATE:
+            PressurePlate plate = (PressurePlate) event.getBlock().getType().getNewData(event.getBlock().getData());
+            checked = new HashSet<Block>();
+            if (plate.isPressed()) {
+                for (BlockFace bf: allSides) {
+                    b = event.getBlock().getRelative(bf);
+                    if (b.getType().equals(Material.JUKEBOX)) {
+                        loopIfJukebox(b);
+                    }
+                }
+                Block other = event.getBlock().getRelative(BlockFace.DOWN);
+                for (BlockFace bf: allSides) {
+                    b = event.getBlock().getRelative(bf);
+                    if (b.getType().equals(Material.JUKEBOX)) {
+                        loopIfJukebox(b);
+                    }
+                }
+            }
+            break;
+        case DAYLIGHT_DETECTOR:
+            if (event.getBlock().isBlockPowered()) {
+                for (BlockFace bf: allSides) {
+                    if (bf.equals(BlockFace.UP)) continue;
+                    if (event.getBlock().getRelative(bf).getType().equals(Material.JUKEBOX)) {
+                        loopIfJukebox(event.getBlock().getRelative(bf));
+                    }
+                }
+            }
+            break;
+        }
+    }
+    
+
+    public void loopIfJukebox(Block b) {
+        LoopingJukebox jb = LoopingJukebox.getAt(this, b.getLocation());
+        if (jb != null && jb.getJukebox().isPlaying()) {
+            jb.onEject();
+            jb.doLoop();
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
