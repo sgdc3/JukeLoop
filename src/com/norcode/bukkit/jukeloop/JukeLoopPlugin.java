@@ -232,8 +232,6 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
             break;
         case STONE_PLATE:
         case WOOD_PLATE:
-        case IRON_PLATE:
-        case GOLD_PLATE:
             PressurePlate plate = (PressurePlate) event.getBlock().getType().getNewData(event.getBlock().getData());
             checked = new HashSet<Block>();
             if (plate.isPressed()) {
