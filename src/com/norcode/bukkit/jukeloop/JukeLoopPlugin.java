@@ -180,6 +180,7 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onBlockRedstoneEvent(BlockRedstoneEvent event) {
+        boolean pressed = false;
         Block jukebox = null;
         switch (event.getBlock().getType()) {
         case REDSTONE_TORCH_OFF:
@@ -233,8 +234,14 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
         case STONE_PLATE:
         case WOOD_PLATE:
             PressurePlate plate = (PressurePlate) event.getBlock().getType().getNewData(event.getBlock().getData());
+            pressed = plate.isPressed();
+        case GOLD_PLATE:
+        case IRON_PLATE:
+            if (event.getBlock().getType().equals(Material.GOLD_PLATE) || event.getBlock().getType().equals(Material.IRON_PLATE)) {
+                pressed = event.getBlock().getData() > 0;
+            }
             checked = new HashSet<Block>();
-            if (plate.isPressed()) {
+            if (pressed) {
                 for (BlockFace bf: allSides) {
                     b = event.getBlock().getRelative(bf);
                     if (b.getType().equals(Material.JUKEBOX)) {
