@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>JukeLoop</groupId>
   <artifactId>JukeLoop</artifactId>
-  <version>0.1.5</version>
+  <version>0.1.6</version>
   <build>
      <resources>
         <resource>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.5.1-R0.2-SNAPSHOT</version>
+            <version>1.5.2-R0.1-SNAPSHOT</version>
         </dependency>
   </dependencies>
 </project>

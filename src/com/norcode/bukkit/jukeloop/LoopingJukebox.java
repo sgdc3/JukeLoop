@@ -119,10 +119,12 @@ public class LoopingJukebox {
         for (Player p : plugin.getServer().getOnlinePlayers()) {
             try {
                 dist = getJukebox().getLocation().distance(p.getLocation());
+                plugin.debug("distance from " + getJukebox().getLocation() + " to " + p.getLocation());
                 if (dist <= 64) {
                     return true;
                 }
             } catch (IllegalArgumentException ex) { // cross-world.
+        	plugin.debug("Cross world distance-check.");
             }
         }
 
@@ -237,14 +239,15 @@ public class LoopingJukebox {
     private boolean takeFromHopper() {
         for (BlockFace dir: JukeLoopPlugin.directions) {
             if (!dir.equals(BlockFace.DOWN)) {
+        	plugin.debug("Checking " + dir + " for hopper.");
                 BlockState bs = this.getJukebox().getBlock().getRelative(dir).getState();
                 if (bs.getType().equals(Material.HOPPER)) {
+                    plugin.debug("Found Hopper.");
                     byte data = ((Hopper) bs).getData().getData();
-                    boolean isPowered = (data & 8) == 8;
                     BlockFace attachedFace = hopperDirections[data & 7];
                     boolean isAttached = attachedFace.getOppositeFace().equals(dir);
                     Inventory inv = ((Hopper) bs).getInventory();
-                    if (isAttached && !isPowered) {
+                    if (isAttached) {
                         for (int i=0;i<inv.getSize();i++) {
                             ItemStack s = inv.getItem(i);
                             if (s != null && JukeLoopPlugin.recordDurations.containsKey(s.getType())) {

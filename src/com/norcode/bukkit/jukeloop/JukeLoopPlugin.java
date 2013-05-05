@@ -85,7 +85,7 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
             playlistOrder.add(m);
         }
     };
-    private void debug(String string) {
+    void debug(String string) {
         // TODO Auto-generated method stub
         if (getConfig().getBoolean("debug", false)) {
             getLogger().info(string);
@@ -112,7 +112,6 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
                             debug("Removing: " + e.getKey() + " from active jukeboxen");
                         } else {
                             jb.doLoop();
-                            debug("looping " + jb);
                         }
                     }
                     for (Location l : toRemove) {
