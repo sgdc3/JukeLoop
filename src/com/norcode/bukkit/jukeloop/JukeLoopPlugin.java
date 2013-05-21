@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.h31ix.updater.Updater;
+import net.h31ix.updater.Updater.UpdateType;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -17,12 +20,14 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Jukebox;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Button;
@@ -38,7 +43,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
 public class JukeLoopPlugin extends JavaPlugin implements Listener {
-    
+    private Updater updater;
     private static Pattern locRegex = Pattern.compile("(\\w+)_(\\-?\\d+)_(\\-?\\d+)_(\\-?\\d+)");
     public static HashMap<Material, String> recordNames = new HashMap<Material, String>(
             13);
@@ -91,10 +96,24 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
             getLogger().info(string);
         }
     } 
-    
+
+    public void doUpdater() {
+        String autoUpdate = getConfig().getString("auto-update", "notify-only").toLowerCase();
+        if (autoUpdate.equals("true")) {
+            updater = new Updater(this, "jukeloop", this.getFile(), UpdateType.DEFAULT, true);
+        } else if (autoUpdate.equals("false")) {
+            getLogger().info("Auto-updater is disabled.  Skipping check.");
+        } else {
+            updater = new Updater(this, "jukeloop", this.getFile(), UpdateType.NO_DOWNLOAD, true);
+        }
+    }
+
     @Override
     public void onEnable() {
-        // TODO Auto-generated method stub
+        saveDefaultConfig();
+        getConfig().options().copyDefaults(true);
+        saveConfig();
+        doUpdater();
         loadData();
         debugMode = getConfig().getBoolean("debug", false);
         getServer().getPluginManager().registerEvents(this, this);
@@ -275,6 +294,31 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
         if (jb != null && jb.getJukebox().isPlaying()) {
             jb.onEject();
             jb.doLoop();
+        }
+    }
+
+    @EventHandler(ignoreCancelled=true)
+    public void onPlayerLogin(PlayerLoginEvent event) {
+        if (event.getPlayer().hasPermission("biab.admin")) {
+            final String playerName = event.getPlayer().getName();
+            getServer().getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
+                public void run() {
+                    Player player = getServer().getPlayer(playerName);
+                    if (player != null && player.isOnline()) {
+                        getLogger().info("Updater Result: " + updater.getResult());
+                        switch (updater.getResult()) {
+                        case UPDATE_AVAILABLE:
+                            player.sendMessage("An update is available for JukeLoop, visit http://dev.bukkit.org/server-mods/jukeloop/ to get it.");
+                            break;
+                        case SUCCESS:
+                            player.sendMessage("An update for JukeLoop has been downloaded and will take effect when the server restarts.");
+                            break;
+                        default:
+                            // nothing
+                        }
+                    }
+                }
+            }, 20);
         }
     }
 
