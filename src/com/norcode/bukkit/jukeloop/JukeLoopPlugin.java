@@ -299,26 +299,27 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
 
     @EventHandler(ignoreCancelled=true)
     public void onPlayerLogin(PlayerLoginEvent event) {
-        if (event.getPlayer().hasPermission("biab.admin")) {
+        if (event.getPlayer().hasPermission("jukeloop.admin")) {
             final String playerName = event.getPlayer().getName();
-            getServer().getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
-                public void run() {
-                    Player player = getServer().getPlayer(playerName);
-                    if (player != null && player.isOnline()) {
-                        getLogger().info("Updater Result: " + updater.getResult());
-                        switch (updater.getResult()) {
-                        case UPDATE_AVAILABLE:
-                            player.sendMessage("An update is available for JukeLoop, visit http://dev.bukkit.org/server-mods/jukeloop/ to get it.");
-                            break;
-                        case SUCCESS:
-                            player.sendMessage("An update for JukeLoop has been downloaded and will take effect when the server restarts.");
-                            break;
-                        default:
-                            // nothing
+            if (updater != null) {
+                getServer().getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
+                    public void run() {
+                        Player player = getServer().getPlayer(playerName);
+                        if (player != null && player.isOnline()) {
+                            switch (updater.getResult()) {
+                            case UPDATE_AVAILABLE:
+                                player.sendMessage("An update is available for JukeLoop, visit http://dev.bukkit.org/server-mods/jukeloop/ to get it.");
+                                break;
+                            case SUCCESS:
+                                player.sendMessage("An update for JukeLoop has been downloaded and will take effect when the server restarts.");
+                                break;
+                            default:
+                                // nothing
+                            }
                         }
                     }
-                }
-            }, 20);
+                }, 20);
+            }
         }
     }
 
