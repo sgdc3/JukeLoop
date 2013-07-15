@@ -12,11 +12,7 @@ import java.util.regex.Pattern;
 import net.h31ix.updater.Updater;
 import net.h31ix.updater.Updater.UpdateType;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Effect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Jukebox;
@@ -95,7 +91,7 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
         if (getConfig().getBoolean("debug", false)) {
             getLogger().info(string);
         }
-    } 
+    }
 
     public void doUpdater() {
         String autoUpdate = getConfig().getString("auto-update", "notify-only").toLowerCase();
@@ -139,7 +135,7 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
                 }
         }, 40, 40);
 
-        saveTask = getServer().getScheduler().runTaskTimer(this, 
+        saveTask = getServer().getScheduler().runTaskTimer(this,
             new Runnable() {
                 @Override
                 public void run() {
@@ -152,7 +148,11 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
         Matcher m = locRegex.matcher(s);
         if (m.matches()) {
             try {
-                return new Location(getServer().getWorld(m.group(1)), Double.parseDouble(m.group(2)), Double.parseDouble(m.group(3)), Double.parseDouble(m.group(4)));
+                World w = getServer().getWorld(m.group(1));
+                if (w == null) {
+                   w = getServer().createWorld(new WorldCreator(m.group(1)));
+                }
+                return new Location(w, Double.parseDouble(m.group(2)), Double.parseDouble(m.group(3)), Double.parseDouble(m.group(4)));
             } catch (IllegalArgumentException ex) {
                 getLogger().warning("Invalid entry: " + s);
             }

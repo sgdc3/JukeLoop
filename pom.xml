@@ -2,17 +2,20 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>JukeLoop</groupId>
   <artifactId>JukeLoop</artifactId>
-  <version>0.1.8</version>
-  <build>
+  <version>0.1.9-SNAPSHOT</version>
+  <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.authors>metalhedd</project.authors>
+        <project.main>com.norcode.bukkit.jukeloop.JukeLoop</project.main>
+  </properties>
+    <build>
      <resources>
-        <resource>
-            <directory>.</directory>
-            <includes>
-                <include>plugin.yml</include>
-                <include>config.yml</include>
-            </includes>
-        </resource>
-    </resources>
+         <resource>
+             <directory>src/main/resources</directory>
+             <filtering>true</filtering>
+         </resource>
+     </resources>
+
     <sourceDirectory>src</sourceDirectory>
     <plugins>
       <plugin>
