@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>JukeLoop</groupId>
   <artifactId>JukeLoop</artifactId>
-  <version>0.1.9-SNAPSHOT</version>
+  <version>0.1.9</version>
   <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.authors>metalhedd</project.authors>
@@ -31,14 +31,14 @@
    <repositories>
         <repository>
             <id>bukkit-repo</id>
-            <url>http://repo.bukkit.org/content/repositories/snapshots/</url>
+            <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
   </repositories>
   <dependencies>
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.5.2-R0.1-SNAPSHOT</version>
+            <version>1.6.2-R1.0</version>
         </dependency>
   </dependencies>
 </project>

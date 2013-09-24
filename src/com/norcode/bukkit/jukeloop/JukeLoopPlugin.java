@@ -41,8 +41,6 @@ import org.bukkit.scheduler.BukkitTask;
 public class JukeLoopPlugin extends JavaPlugin implements Listener {
     private Updater updater;
     private static Pattern locRegex = Pattern.compile("(\\w+)_(\\-?\\d+)_(\\-?\\d+)_(\\-?\\d+)");
-    public static HashMap<Material, String> recordNames = new HashMap<Material, String>(
-            13);
 
     public static BlockFace[] directions = new BlockFace[] { BlockFace.EAST,
             BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.DOWN,
@@ -54,20 +52,6 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
     public boolean debugMode = false;
     private BukkitTask saveTask = null;
     static {
-        // set record names
-        recordNames.put(Material.GOLD_RECORD, "13");
-        recordNames.put(Material.GREEN_RECORD, "cat");
-        recordNames.put(Material.RECORD_3, "blocks");
-        recordNames.put(Material.RECORD_4, "chirp");
-        recordNames.put(Material.RECORD_5, "far");
-        recordNames.put(Material.RECORD_6, "mall");
-        recordNames.put(Material.RECORD_7, "mellohi");
-        recordNames.put(Material.RECORD_8, "stal");
-        recordNames.put(Material.RECORD_9, "strad");
-        recordNames.put(Material.RECORD_10, "ward");
-        recordNames.put(Material.RECORD_11, "11");
-        recordNames.put(Material.RECORD_12, "wait");
-
         // set record durations
         recordDurations.put(Material.GOLD_RECORD, (2 * 60) + 58);
         recordDurations.put(Material.GREEN_RECORD, (3 * 60) + 5);
@@ -110,6 +94,9 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
         getConfig().options().copyDefaults(true);
         saveConfig();
         doUpdater();
+        for (Material m: recordDurations.keySet()) {
+            recordDurations.put(m, getConfig().getInt("record-durations." + m.name(), recordDurations.get(m)));
+        }
         loadData();
         debugMode = getConfig().getBoolean("debug", false);
         getServer().getPluginManager().registerEvents(this, this);
