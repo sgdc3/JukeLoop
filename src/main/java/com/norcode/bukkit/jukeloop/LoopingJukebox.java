@@ -147,22 +147,25 @@ public class LoopingJukebox {
 
         int now = (int) (System.currentTimeMillis() / 1000);
         Material record = jukebox.getPlaying();
-        if (now - startedAt > JukeLoopPlugin.recordDurations.get(record)) {
-            if (!playersNearby()) { 
-                log("doLoop:No player nearby.");
-                return; 
-            }
-            if (!putInHopper()) {
-                if (!putInChest()) {
-                    log("doLoop:Couldn't put " + record + " anywhere, repeating.");
-                    jukebox.setPlaying(record);
-                    onInsert(record);
+        Integer duration = JukeLoopPlugin.recordDurations.get(record);
+        if (duration != null) {
+            if (now - startedAt > duration) {
+                if (!playersNearby()) {
+                    log("doLoop:No player nearby.");
                     return;
                 }
-            }
-            if (!takeFromHopper()) {
-                if (!takeFromChest()) {
-                    log("This shouldn't happen");
+                if (!putInHopper()) {
+                    if (!putInChest()) {
+                        log("doLoop:Couldn't put " + record + " anywhere, repeating.");
+                        jukebox.setPlaying(record);
+                        onInsert(record);
+                        return;
+                    }
+                }
+                if (!takeFromHopper()) {
+                    if (!takeFromChest()) {
+                        log("This shouldn't happen");
+                    }
                 }
             }
         }
