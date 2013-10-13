@@ -9,9 +9,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.h31ix.updater.Updater;
-import net.h31ix.updater.Updater.UpdateType;
-
+import net.gravitydevelopment.updater.Updater;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -80,11 +78,11 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
     public void doUpdater() {
         String autoUpdate = getConfig().getString("auto-update", "notify-only").toLowerCase();
         if (autoUpdate.equals("true")) {
-            updater = new Updater(this, "jukeloop", this.getFile(), UpdateType.DEFAULT, true);
+            updater = new Updater(this, 48295, this.getFile(), Updater.UpdateType.DEFAULT, true);
         } else if (autoUpdate.equals("false")) {
             getLogger().info("Auto-updater is disabled.  Skipping check.");
         } else {
-            updater = new Updater(this, "jukeloop", this.getFile(), UpdateType.NO_DOWNLOAD, true);
+            updater = new Updater(this, 48295, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, true);
         }
     }
 
