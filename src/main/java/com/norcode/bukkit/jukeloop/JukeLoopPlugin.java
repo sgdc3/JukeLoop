@@ -151,8 +151,10 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
         for (String s : getConfig().getStringList("jukeboxes")) {
             l = parseLocation(s);
             LoopingJukebox box = LoopingJukebox.getAt(this, l);
-            LoopingJukebox.jukeboxMap.put(l, box);
-            debug("initialized " + l + "->" + box);
+			if (box != null) {
+            	LoopingJukebox.jukeboxMap.put(l, box);
+            	debug("initialized " + l + "->" + box);
+			}
         }
         debug("map has " + LoopingJukebox.jukeboxMap.size() + " entries.");
     }
