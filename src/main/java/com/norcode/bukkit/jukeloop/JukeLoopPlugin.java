@@ -1,16 +1,10 @@
 package com.norcode.bukkit.jukeloop;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import net.gravitydevelopment.updater.Updater;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Jukebox;
@@ -24,17 +18,21 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Attachable;
-import org.bukkit.material.Button;
 import org.bukkit.material.Diode;
-import org.bukkit.material.Lever;
 import org.bukkit.material.PressurePlate;
 import org.bukkit.material.Redstone;
 import org.bukkit.material.RedstoneTorch;
-import org.bukkit.material.RedstoneWire;
-import org.bukkit.material.SimpleAttachableMaterialData;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JukeLoopPlugin extends JavaPlugin implements Listener {
     private Updater updater;
@@ -48,6 +46,8 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
     public static HashMap<Material, Integer> recordDurations = new HashMap<Material, Integer>();
     private BukkitTask checkTask = null;
     public boolean debugMode = false;
+	Location l;
+
     private BukkitTask saveTask = null;
     static {
         // set record durations
