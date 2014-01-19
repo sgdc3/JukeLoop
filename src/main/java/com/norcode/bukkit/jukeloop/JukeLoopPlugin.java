@@ -8,6 +8,8 @@ import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Jukebox;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -49,25 +51,30 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
 	Location l;
 
     private BukkitTask saveTask = null;
-    static {
-        // set record durations
-        recordDurations.put(Material.GOLD_RECORD, (2 * 60) + 58);
-        recordDurations.put(Material.GREEN_RECORD, (3 * 60) + 5);
-        recordDurations.put(Material.RECORD_3, (5 * 60) + 45);
-        recordDurations.put(Material.RECORD_4, (3 * 60) + 5);
-        recordDurations.put(Material.RECORD_5, (2 * 60) + 54);
-        recordDurations.put(Material.RECORD_6, (3 * 60) + 17);
-        recordDurations.put(Material.RECORD_7, (1 * 60) + 36);
-        recordDurations.put(Material.RECORD_8, (2 * 60) + 30);
-        recordDurations.put(Material.RECORD_9, (3 * 60) + 8);
-        recordDurations.put(Material.RECORD_10, (4 * 60) + 11);
-        recordDurations.put(Material.RECORD_11, (1 * 60) + 11);
-        recordDurations.put(Material.RECORD_12, (3 * 60) + 55);
-        playlistOrder = new ArrayList<Material>(recordDurations.size());
-        for (Material m : recordDurations.keySet()) {
-            playlistOrder.add(m);
-        }
+
+	static {
+         resetRecordDurations();
     };
+
+	private static void resetRecordDurations() {
+		// set record durations
+		recordDurations.put(Material.GOLD_RECORD, (2 * 60) + 58);
+		recordDurations.put(Material.GREEN_RECORD, (3 * 60) + 5);
+		recordDurations.put(Material.RECORD_3, (5 * 60) + 45);
+		recordDurations.put(Material.RECORD_4, (3 * 60) + 5);
+		recordDurations.put(Material.RECORD_5, (2 * 60) + 54);
+		recordDurations.put(Material.RECORD_6, (3 * 60) + 17);
+		recordDurations.put(Material.RECORD_7, (1 * 60) + 36);
+		recordDurations.put(Material.RECORD_8, (2 * 60) + 30);
+		recordDurations.put(Material.RECORD_9, (3 * 60) + 8);
+		recordDurations.put(Material.RECORD_10, (4 * 60) + 11);
+		recordDurations.put(Material.RECORD_11, (1 * 60) + 11);
+		recordDurations.put(Material.RECORD_12, (3 * 60) + 55);
+		playlistOrder = new ArrayList<Material>(recordDurations.size());
+		for (Material m : recordDurations.keySet()) {
+			playlistOrder.add(m);
+		}
+	}
     void debug(String string) {
         // TODO Auto-generated method stub
         if (getConfig().getBoolean("debug", false)) {
@@ -86,17 +93,21 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
         }
     }
 
+	public void loadDurations() {
+		for (Material m: recordDurations.keySet()) {
+			recordDurations.put(m, getConfig().getInt("record-durations." + m.name(), recordDurations.get(m)));
+		}
+		loadData();
+		debugMode = getConfig().getBoolean("debug", false);
+	}
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
         doUpdater();
-        for (Material m: recordDurations.keySet()) {
-            recordDurations.put(m, getConfig().getInt("record-durations." + m.name(), recordDurations.get(m)));
-        }
-        loadData();
-        debugMode = getConfig().getBoolean("debug", false);
+        loadDurations();
         getServer().getPluginManager().registerEvents(this, this);
         checkTask = getServer().getScheduler().runTaskTimer(this,
             new Runnable() {
@@ -309,6 +320,25 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
             }
         }
     }
+
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if (label.equals("jukeloop")) {
+			if (args.length > 0) {
+				if (sender.hasPermission("jukeloop.reload") && args[0].equalsIgnoreCase("reload")) {
+					// reload
+					reloadConfig();
+					resetRecordDurations();
+					loadDurations();
+					sender.sendMessage("[JukeLoop] Reloaded.");
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
 
     @EventHandler(ignoreCancelled = true)
     public void onInteractJukebox(PlayerInteractEvent e) {

@@ -4,3 +4,8 @@ description: Makes jukeboxes loop
 author: metalhedd
 
 main: com.norcode.bukkit.jukeloop.JukeLoopPlugin
+
+commands:
+  jukeloop:
+    usage: /<command> reload
+    permission: jukeloop.admin
