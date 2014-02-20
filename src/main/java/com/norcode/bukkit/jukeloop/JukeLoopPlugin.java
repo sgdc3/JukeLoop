@@ -10,6 +10,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Jukebox;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -94,8 +95,23 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
     }
 
 	public void loadDurations() {
-		for (Material m: recordDurations.keySet()) {
-			recordDurations.put(m, getConfig().getInt("record-durations." + m.name(), recordDurations.get(m)));
+		ConfigurationSection cfg = getConfig().getConfigurationSection("record-durations");
+		for (String key: cfg.getKeys(false)) {
+			Material mat = null;
+			try {
+				Integer matId = Integer.parseInt(key);
+				mat = Material.getMaterial(matId);
+			} catch (IllegalArgumentException ex) {
+				mat = Material.getMaterial(key);
+			}
+			if (mat == null) {
+				getLogger().warning("Unknown record: " + key);
+				continue;
+			}
+			recordDurations.put(mat, cfg.getInt(key));
+			if (!playlistOrder.contains(mat)) {
+				playlistOrder.add(mat);
+			}
 		}
 		loadData();
 		debugMode = getConfig().getBoolean("debug", false);
