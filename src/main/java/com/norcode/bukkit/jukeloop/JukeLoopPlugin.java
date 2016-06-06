@@ -17,6 +17,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Diode;
 import org.bukkit.material.PressurePlate;
@@ -369,14 +370,19 @@ public class JukeLoopPlugin extends JavaPlugin implements Listener {
             }
         } else if (e.getAction() == Action.RIGHT_CLICK_BLOCK
                 && e.getClickedBlock().getType() == Material.JUKEBOX
-                && recordDurations.containsKey(e.getPlayer().getItemInHand().getType())) {
+                && recordDurations.containsKey(e.getItem().getType())) {
             Jukebox box = (Jukebox) e.getClickedBlock().getState();
             LoopingJukebox jb = LoopingJukebox.getAt(this, box.getLocation());
-            Material record = e.getPlayer().getItemInHand().getType();
+            Material record = e.getItem().getType();
             if (!box.isPlaying()) {
                 e.setCancelled(true);
                 box.setPlaying(record);
-                e.getPlayer().setItemInHand(new ItemStack(Material.AIR));
+                PlayerInventory inventory = e.getPlayer().getInventory();
+                if(inventory.getItemInMainHand().equals(e.getItem())) {
+                    inventory.setItemInMainHand(new ItemStack(Material.AIR));
+                } else if (inventory.getItemInOffHand().equals(e.getItem())) {
+                    inventory.setItemInOffHand(new ItemStack(Material.AIR));
+                }
                 jb.onInsert(record);
             } else {
                 jb.onEject();
