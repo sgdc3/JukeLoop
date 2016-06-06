@@ -1,6 +1,5 @@
 package com.norcode.bukkit.jukeloop;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import org.bukkit.Location;
@@ -13,7 +12,6 @@ import org.bukkit.block.Jukebox;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Attachable;
 
 public class LoopingJukebox {
     private Location location;
