@@ -1,4 +1,4 @@
-auto-update: true
+#auto-update: false
 record-durations:
     GOLD_RECORD: 178
     GREEN_RECORD: 185

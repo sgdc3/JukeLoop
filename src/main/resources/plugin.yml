@@ -1,10 +1,8 @@
-name: JukeLoop
+name: ${project.name}
 version: ${project.version}
-description: Makes jukeboxes loop
-author: metalhedd
-
-main: com.norcode.bukkit.jukeloop.JukeLoopPlugin
-
+description: ${project.description}
+authors: [${project.authors}]
+main: ${project.main}
 commands:
   jukeloop:
     usage: /<command> reload
